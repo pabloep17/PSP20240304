@@ -8,12 +8,15 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
+import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.util.Base64;
+
+import javax.crypto.Cipher;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -294,7 +297,26 @@ class ServidorUnitTest {
 	@Test
 	@DisplayName("(3 puntos) Petición \"cifrar\"")
 	void test17() {
-		fail("Not yet implemented");
+		StringBuilder sb = new StringBuilder();
+		try (Socket socket = new Socket("localhost", 9000)) {
+			socket.setSoTimeout(10000);
+			DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+			out.writeUTF("cifrar");
+			out.writeUTF("psp");
+			out.write("Fernando Alonso 2024 Campeon del Mundo. Hoy, 07/03/2024 quedo segundo en libres dos y PRIMERO en libres uno. Va a ganar en Arabia Saudita".getBytes());
+			socket.shutdownOutput();
+			DataInputStream in = new DataInputStream(socket.getInputStream());
+			Key key = ks.getKey("psp", "practicas".toCharArray());
+			Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+			while (true) {
+				c.init(Cipher.DECRYPT_MODE, key);
+				String[] s = in.readUTF().split(":");
+				assertEquals("OK", s[0]);
+				sb.append(new String(c.doFinal(Base64.getDecoder().decode(s[1]))));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
 	}
 	
 	@Test
