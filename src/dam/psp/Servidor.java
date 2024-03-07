@@ -15,7 +15,7 @@ public class Servidor {
 		 try {
 			ks = KeyStore.getInstance(KeyStore.getDefaultType());
 		} catch (KeyStoreException e) {
-			e.printStackTrace();
+
 		}
 		try (ServerSocket ss = new ServerSocket(9000)) {
 			while (true) {
@@ -27,7 +27,7 @@ public class Servidor {
 				u.start();
 			}
 		} catch (IOException e1) {
-			System.err.println("In/out error: " + e1);
+
 		}
 
 	}
